@@ -1,0 +1,12 @@
+node_modules/
+*.db
+.env
+stxaviers_key
+stxaviers_key.pub
+cloudflared.exe
+*.zip
+deploy_tmp/
+static_deploy/
+make_word_doc.js
+WEBSITE_DETAILS.docx
+WEBSITE_DETAILS.txt

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard - St. Xavier's High School</title>
+  <style>
+    :root { --navy: #071b3e; --gold: #c8880a; --bg: #f4f6f9; --white: #fff; --text: #333; --border: #e2e8f0; }
+    body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+    header { background: var(--navy); color: var(--white); padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 20px; color: var(--gold); }
+    .logout-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 8px 16px; cursor: pointer; border-radius: 4px; }
+    .container { display: flex; min-height: calc(100vh - 68px); }
+    .sidebar { width: 250px; background: var(--white); border-right: 1px solid var(--border); }
+    .nav-btn { display: block; width: 100%; padding: 15px 20px; text-align: left; background: none; border: none; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 16px; }
+    .nav-btn.active, .nav-btn:hover { background: var(--bg); color: var(--navy); border-left: 4px solid var(--gold); font-weight: bold; }
+    .main-content { flex: 1; padding: 30px; }
+    .section { display: none; background: var(--white); padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .section.active { display: block; }
+    h2 { margin-top: 0; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 10px; }
+    button.btn { background: var(--gold); color: var(--white); border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+    button.btn:hover { background: #b17909; }
+    button.btn-danger { background: #dc3545; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px; font-size: 12px;}
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 12px; border: 1px solid var(--border); text-align: left; }
+    th { background: var(--bg); }
+    
+    #loginScreen { position: fixed; inset: 0; background: var(--navy); display: flex; align-items: center; justify-content: center; z-index: 999; }
+    .login-box { background: white; padding: 40px; border-radius: 8px; width: 300px; text-align: center; }
+    .login-box h2 { color: var(--navy); }
+  </style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <h2>Admin Login</h2>
+    <input type="email" id="lEmail" placeholder="Admin Email" />
+    <input type="password" id="lPass" placeholder="Password" />
+    <p id="lErr" style="color:red; display:none;">Invalid credentials</p>
+    <button class="btn" style="width:100%;" onclick="login()">Login</button>
+  </div>
+</div>
+
+<header>
+  <h1>CMS Dashboard</h1>
+  <div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</header>
+<div class="container">
+  <div class="sidebar">
+    <button class="nav-btn active" onclick="showTab('content')">Text Contents</button>
+    <button class="nav-btn" onclick="showTab('notifications')">Notifications</button>
+    <button class="nav-btn" onclick="showTab('gallery')">Gallery</button>
+  </div>
+  
+  <div class="main-content">
+    
+    <!-- Text Content -->
+    <div id="content" class="section active">
+      <h2>Edit Website Content</h2>
+      <div id="contentForms">Loading...</div>
+      <button class="btn" onclick="saveContent()">Save All Content</button>
+    </div>
+
+    <!-- Notifications -->
+    <div id="notifications" class="section">
+      <h2>Manage Notifications</h2>
+      <div style="background: var(--bg); padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+        <h3>Add New</h3>
+        <select id="nCat"><option>Admission</option><option>Academics</option><option>Event</option><option>Exam</option><option>General</option></select>
+        <input type="text" id="nTitle" placeholder="Title"/>
+        <textarea id="nDesc" placeholder="Description"></textarea>
+        <button class="btn" onclick="addNotif()">Add Notification</button>
+      </div>
+      <table id="notifTable">
+        <thead><tr><th>Date</th><th>Category</th><th>Title</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Gallery -->
+    <div id="gallery" class="section">
+      <h2>Manage Gallery</h2>
+       <div style="background: var(--bg); padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+        <h3>Upload Image</h3>
+        <input type="file" id="gFile" accept="image/*" />
+        <input type="text" id="gAlt" placeholder="Short description (Alt text)"/>
+        <select id="gCls"><option value="">Standard Size</option><option value="large">Large Size</option><option value="tall">Tall Size</option></select>
+        <button class="btn" onclick="addGallery()">Upload Image</button>
+      </div>
+      <div id="galleryGrid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+let token = localStorage.getItem('cmsToken');
+
+function checkAuth() {
+  if(token) {
+    document.getElementById('loginScreen').style.display = 'none';
+    loadContent();
+    loadNotifications();
+    loadGallery();
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+}
+
+async function login() {
+  const email = document.getElementById('lEmail').value;
+  const password = document.getElementById('lPass').value;
+  const r = await fetch('/api/login', {
+    method: 'POST',
+    headers:{'Content-Type': 'application/json'},
+    body: JSON.stringify({email, password})
+  });
+  if(r.ok) {
+    const data = await r.json();
+    token = data.token;
+    localStorage.setItem('cmsToken', token);
+    checkAuth();
+  } else {
+    document.getElementById('lErr').style.display = 'block';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('cmsToken');
+  token = null;
+  checkAuth();
+}
+
+const reqAuth = () => ({ 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' });
+
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// -- Content Blocks
+async function loadContent() {
+  const r = await fetch('/api/content');
+  const items = await r.json();
+  let html = '';
+  for(const [key, val] of Object.entries(items)) {
+    html += `<div class="form-group"><label>${key.replace(/_/g, ' ').toUpperCase()}</label>`;
+    if(val.length > 50) html += `<textarea id="content_${key}" rows="3">${val}</textarea>`;
+    else html += `<input type="text" id="content_${key}" value="${val}"/>`;
+    html += `</div>`;
+  }
+  document.getElementById('contentForms').innerHTML = html;
+}
+
+async function saveContent() {
+  const payload = {};
+  document.querySelectorAll('[id^="content_"]').forEach(el => {
+    payload[el.id.replace('content_', '')] = el.value;
+  });
+  const r = await fetch('/api/content', { method: 'PUT', headers: reqAuth(), body: JSON.stringify(payload) });
+  if(r.ok) alert('Saved successfully!');
+}
+
+// -- Notifications
+async function loadNotifications() {
+  const r = await fetch('/api/notifications');
+  const items = await r.json();
+  const tb = document.querySelector('#notifTable tbody');
+  tb.innerHTML = '';
+  items.forEach(i => {
+    tb.innerHTML += `<tr><td>${i.date}</td><td>${i.category}</td><td>${i.title}</td>
+    <td><button class="btn-danger" onclick="delNotif(${i.id})">Delete</button></td></tr>`;
+  });
+}
+async function addNotif() {
+  const title = document.getElementById('nTitle').value;
+  const category = document.getElementById('nCat').value;
+  const desc = document.getElementById('nDesc').value;
+  const date = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const r = await fetch('/api/notifications', { method: 'POST', headers: reqAuth(), body: JSON.stringify({title, category, desc, date}) });
+  if(r.ok) { document.getElementById('nTitle').value=''; document.getElementById('nDesc').value=''; loadNotifications(); }
+}
+async function delNotif(id) {
+  if(confirm('Delete this notification?')) {
+    await fetch('/api/notifications/'+id, { method: 'DELETE', headers: reqAuth() });
+    loadNotifications();
+  }
+}
+
+// -- Gallery
+async function loadGallery() {
+  const r = await fetch('/api/gallery');
+  const items = await r.json();
+  let html = '';
+  items.forEach(i => {
+    html += `<div style="border:1px solid #ccc; padding:5px; text-align:center;">
+             <img src="${i.src}" style="width:100%; height:100px; object-fit:cover;" />
+             <p style="font-size:12px; height:18px; overflow:hidden;">${i.alt}</p>
+             <button class="btn-danger" onclick="delGallery(${i.id})">Delete</button></div>`;
+  });
+  document.getElementById('galleryGrid').innerHTML = html;
+}
+async function addGallery() {
+  const file = document.getElementById('gFile').files[0];
+  if(!file) return alert('Select a file');
+  const fd = new FormData();
+  fd.append('image', file);
+  fd.append('alt', document.getElementById('gAlt').value);
+  fd.append('cls', document.getElementById('gCls').value);
+  const r = await fetch('/api/gallery', { method: 'POST', headers: {'Authorization': 'Bearer ' + token}, body: fd });
+  if(r.ok) { loadGallery(); document.getElementById('gFile').value = ''; }
+}
+async function delGallery(id) {
+  if(confirm('Delete image?')) {
+    await fetch('/api/gallery/'+id, { method: 'DELETE', headers: reqAuth() });
+    loadGallery();
+  }
+}
+
+checkAuth();
+</script>
+</body>
+</html>
