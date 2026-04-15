@@ -866,7 +866,7 @@ footer{background:var(--navy);}
         </label>
       </div>
       <div class="form-notice">
-        ⚠️ <strong>Important:</strong> After clicking Submit, your email client will open with all form details pre-filled. Please manually attach all uploaded documents to the email before sending. The application will be sent to: <strong>susmanjha9@gmail.com, stxaviersjagatpur@gmail.com</strong>
+        ⚠️ <strong>Important:</strong> Please ensure all documents are clear and legible. High-quality scans or well-lit photos are preferred.
       </div>
       <div class="form-btns">
         <button class="btn-submit" onclick="submitAdmissionForm()">📧 Submit Application</button>
@@ -1141,31 +1141,46 @@ function submitAdmissionForm(){
   if(missing.length){alert('Please fill in all required fields (marked with *).');return;}
   if(!document.getElementById('fDecl').checked){alert('Please read and accept the declaration to proceed.');return;}
   
-  var payload = {};
-  req.forEach(id => payload[id] = v(id));
-  payload.fPrevSchool = v('fPrevSchool');
-  payload.fPrevClass = v('fPrevClass');
-  payload.fFOccup = v('fFOccup');
-  payload.fMOccup = v('fMOccup');
-  payload.fPhone2 = v('fPhone2');
-  payload.fBus = v('fBus');
-  payload.fBusArea = v('fBusArea');
-  payload.fMessage = v('fMessage');
+  // Create FormData for files + text
+  var fd = new FormData();
+  req.forEach(id => fd.append(id, v(id)));
+  ['fPrevSchool','fPrevClass','fFOccup','fMOccup','fPhone2','fBus','fBusArea','fMessage'].forEach(id => fd.append(id, v(id)));
 
-  // Formsubmit.co exact zero-configuration setup
-  payload._cc = 'stxaviersjagatpur@gmail.com';
-  payload._subject = 'Admission Application – ' + payload.fFirstName + ' ' + payload.fLastName + ' (' + payload.fClass + ')';
-  payload._captcha = 'false';
+  // Append Files if selected
+  var fileIds = ['fPhotoStudent', 'fPhotoFather', 'fPhotoMother', 'fAadharStudent', 'fAadharFather', 'fAadharMother', 'fBirthCert', 'fTC', 'fReportCard'];
+  fileIds.forEach(id => {
+    var fileInput = document.getElementById(id);
+    if(fileInput && fileInput.files.length > 0) {
+      fd.append(id, fileInput.files[0]);
+    }
+  });
+
+  // FormSubmit.co setup
+  fd.append('_cc', 'stxaviersjagatpur@gmail.com');
+  fd.append('_subject', 'Admission Application – ' + v('fFirstName') + ' ' + v('fLastName') + ' (' + v('fClass') + ')');
+  fd.append('_captcha', 'false');
+
+  var btn = document.querySelector('.btn-submit');
+  var origText = btn.innerHTML;
+  btn.innerHTML = '⏳ Submitting...';
+  btn.disabled = true;
 
   fetch('https://formsubmit.co/ajax/susmanjha9@gmail.com', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(payload)
+    body: fd
   }).then(r => r.json()).then(data => {
-    document.getElementById('appFormContainer').style.display='none';
-    document.getElementById('successMsg').style.display='block';
-    window.scrollTo({top:document.getElementById('apply').offsetTop-80,behavior:'smooth'});
+    btn.innerHTML = origText;
+    btn.disabled = false;
+    if(data.success || data.message || data.id) {
+      document.getElementById('appFormContainer').style.display='none';
+      document.getElementById('successMsg').style.display='block';
+      window.scrollTo({top:document.getElementById('apply').offsetTop-80,behavior:'smooth'});
+    } else {
+      alert('Error submitting application: ' + (data.error || 'Unknown error'));
+    }
   }).catch(e => {
+    btn.innerHTML = origText;
+    btn.disabled = false;
     alert('Failed to submit application via server. Please check your internet connection.');
   });
 }

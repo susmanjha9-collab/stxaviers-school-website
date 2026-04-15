@@ -1,6 +1,6 @@
 ============================================================
    ST. XAVIER'S HIGH SCHOOL, JAGATPUR - WEBSITE INFO
-   Saved on: 12 April 2026
+   Saved on: 15 April 2026
 ============================================================
 
 WEBSITE LINK (Share this with parents & students):
@@ -13,14 +13,47 @@ It runs on Render.com cloud servers automatically.
 
 ADMIN PANEL (To manage website content):
 --------------------------------------------------
-Link     : 
-Email    : susmanjha9@gmail.com
-Password : XavierAdmin@2026
+Link     : https://stxaviers-school-website.onrender.com/admin/
 
-From the Admin Panel you can:
-  - Add or delete Notices/Notifications
-  - Upload Gallery images
-  - Edit school content and contact info
+ADMIN EMAIL 1 : susmanjha9@gmail.com
+ADMIN EMAIL 2 : stxaviersjagatpur@gmail.com
+Password      : XavierAdmin@2026
+
+Both emails can login with the same password and have FULL access.
+
+
+FROM THE ADMIN PANEL YOU CAN NOW DO EVERYTHING:
+--------------------------------------------------
+EDIT ALL CONTENT:
+  - School name, tagline, sub-title, affiliation
+  - Hero section text, badge, description
+  - All statistics (students, faculty, years, pass rate)
+  - About Us text, mission, vision, values, promise
+  - Principal's quote and name
+  - Contact info: phone, email, address, office hours
+  - Google Maps embed URL
+  - School timings (morning & day sessions)
+  - Admission year and CTA text
+  - News ticker scrolling text
+
+MANAGE NOTIFICATIONS:
+  - Add new notices with category, date, title & description
+  - Search/filter existing notifications
+  - Delete any notification
+
+MANAGE GALLERY:
+  - Upload photos (standard, large 2x2, or tall 1x2 size)
+  - Drag & drop image upload
+  - Delete gallery photos
+
+ADMIN USERS:
+  - See all admin accounts
+  - Add new admin users
+  - Reset any admin's password
+  - Remove admin access
+
+CHANGE PASSWORD:
+  - Change your own login password
 
 
 GITHUB (Where the website code is stored):
@@ -42,9 +75,11 @@ for it to wake up. After that it works normally.
 This is completely free and automatic.
 
 
-FOR ANY CHANGES TO THE WEBSITE:
+IMPORTANT: AFTER MAKING ADMIN PANEL CHANGES ON YOUR LOCAL PC
 --------------------------------------------------
-Contact the developer or use the Admin Panel above.
-Do NOT delete the files in this folder.
+These changes only affect your LOCAL server (http://localhost:3000).
+To make changes on the LIVE website:
+1. Upload the changed files to GitHub
+2. Render.com will automatically redeploy
 
 ============================================================

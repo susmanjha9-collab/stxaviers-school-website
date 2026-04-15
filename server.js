@@ -46,6 +46,15 @@ const authenticateJWT = (req, res, next) => {
   }
 };
 
+/* ─── SECURITY: REQUIRE PENDRIVE / STRICT LOCAL ─── */
+const requirePendrive = (req, res, next) => {
+  // Render.com automatically sets process.env.RENDER to 'true'
+  if (process.env.RENDER) {
+    return res.status(403).json({ error: 'Security Lock! To add admins, delete admins, or change passwords, you MUST plug in your USB Pendrive and run the program locally. This is blocked on the public internet.' });
+  }
+  next();
+};
+
 /* ─── API: LOGIN ─── */
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
@@ -60,7 +69,7 @@ app.post('/api/login', (req, res) => {
 });
 
 /* ─── API: CHANGE PASSWORD ─── */
-app.post('/api/change-password', authenticateJWT, (req, res) => {
+app.post('/api/change-password', authenticateJWT, requirePendrive, (req, res) => {
   const { currentPassword, newPassword } = req.body;
   if (!newPassword || newPassword.length < 6) {
     return res.status(400).json({ error: 'New password must be at least 6 characters' });
@@ -87,7 +96,7 @@ app.get('/api/admins', authenticateJWT, (req, res) => {
 });
 
 /* ─── API: ADD ADMIN ─── */
-app.post('/api/admins', authenticateJWT, (req, res) => {
+app.post('/api/admins', authenticateJWT, requirePendrive, (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
   if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
@@ -102,7 +111,7 @@ app.post('/api/admins', authenticateJWT, (req, res) => {
 });
 
 /* ─── API: DELETE ADMIN ─── */
-app.delete('/api/admins/:id', authenticateJWT, (req, res) => {
+app.delete('/api/admins/:id', authenticateJWT, requirePendrive, (req, res) => {
   // Prevent deleting yourself
   if (parseInt(req.params.id) === req.user.id) {
     return res.status(400).json({ error: 'You cannot delete your own account' });
@@ -114,7 +123,7 @@ app.delete('/api/admins/:id', authenticateJWT, (req, res) => {
 });
 
 /* ─── API: RESET ADMIN PASSWORD ─── */
-app.put('/api/admins/:id/reset-password', authenticateJWT, (req, res) => {
+app.put('/api/admins/:id/reset-password', authenticateJWT, requirePendrive, (req, res) => {
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 6) {
     return res.status(400).json({ error: 'Password must be at least 6 characters' });
@@ -220,9 +229,26 @@ app.delete('/api/gallery/:id', authenticateJWT, (req, res) => {
   });
 });
 
-/* ─── API: ADMISSION EMAIL ─── */
-app.post('/api/apply', async (req, res) => {
+/* ─── API: ADMISSION EMAIL (with file attachments) ─── */
+// Use multer to accept all uploaded files from the admission form
+const admissionUpload = multer({
+  storage: multer.memoryStorage(), // keep files in memory to attach to email
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB per file
+});
+
+app.post('/api/apply', admissionUpload.fields([
+  { name: 'fPhotoStudent', maxCount: 1 },
+  { name: 'fPhotoFather',  maxCount: 1 },
+  { name: 'fPhotoMother',  maxCount: 1 },
+  { name: 'fAadharStudent',maxCount: 1 },
+  { name: 'fAadharFather', maxCount: 1 },
+  { name: 'fAadharMother', maxCount: 1 },
+  { name: 'fBirthCert',    maxCount: 1 },
+  { name: 'fTC',           maxCount: 1 },
+  { name: 'fReportCard',   maxCount: 1 },
+]), async (req, res) => {
   const data = req.body;
+  const files = req.files || {};
   const toEmail = 'susmanjha9@gmail.com, stxaviersjagatpur@gmail.com';
   const fromEmail = 'susmanjha9@gmail.com';
 
@@ -276,6 +302,19 @@ Pick-up Area: ${data.fBusArea || 'N/A'}
 ${data.fMessage || 'None'}
     `
   };
+
+  const attachments = [];
+  for (const fieldName in files) {
+    const fileArray = files[fieldName];
+    if (fileArray && fileArray.length > 0) {
+      const file = fileArray[0];
+      attachments.push({
+        filename: file.originalname,
+        content: file.buffer
+      });
+    }
+  }
+  mailOptions.attachments = attachments;
 
   try {
     if (process.env.SMTP_PASS) {
