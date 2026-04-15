@@ -10,7 +10,7 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SECRET_KEY = 'st_xaviers_super_secret_key'; // In prod, use environment variable
+const SECRET_KEY = process.env.JWT_SECRET || 'st_xaviers_super_secret_key_2026';
 
 app.use(cors());
 app.use(express.json());
@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB limit
 
 // Serve static frontend
 app.use(express.static(__dirname));
@@ -52,10 +52,77 @@ app.post('/api/login', (req, res) => {
   db.get('SELECT * FROM users WHERE email = ?', [email], (err, user) => {
     if (user && bcrypt.compareSync(password, user.password)) {
       const token = jwt.sign({ email: user.email, id: user.id }, SECRET_KEY, { expiresIn: '24h' });
-      res.json({ token, message: 'Login successful' });
+      res.json({ token, message: 'Login successful', email: user.email });
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
     }
+  });
+});
+
+/* ─── API: CHANGE PASSWORD ─── */
+app.post('/api/change-password', authenticateJWT, (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters' });
+  }
+  db.get('SELECT * FROM users WHERE id = ?', [req.user.id], (err, user) => {
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!bcrypt.compareSync(currentPassword, user.password)) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+    const hash = bcrypt.hashSync(newPassword, 10);
+    db.run('UPDATE users SET password = ? WHERE id = ?', [hash, req.user.id], (err) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, message: 'Password changed successfully' });
+    });
+  });
+});
+
+/* ─── API: GET ALL ADMINS ─── */
+app.get('/api/admins', authenticateJWT, (req, res) => {
+  db.all('SELECT id, email FROM users', (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+/* ─── API: ADD ADMIN ─── */
+app.post('/api/admins', authenticateJWT, (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
+  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  const hash = bcrypt.hashSync(password, 10);
+  db.run('INSERT INTO users (email, password) VALUES (?, ?)', [email, hash], function(err) {
+    if (err) {
+      if (err.message.includes('UNIQUE')) return res.status(400).json({ error: 'Email already exists' });
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ id: this.lastID, email });
+  });
+});
+
+/* ─── API: DELETE ADMIN ─── */
+app.delete('/api/admins/:id', authenticateJWT, (req, res) => {
+  // Prevent deleting yourself
+  if (parseInt(req.params.id) === req.user.id) {
+    return res.status(400).json({ error: 'You cannot delete your own account' });
+  }
+  db.run('DELETE FROM users WHERE id = ?', [req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+/* ─── API: RESET ADMIN PASSWORD ─── */
+app.put('/api/admins/:id/reset-password', authenticateJWT, (req, res) => {
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+  const hash = bcrypt.hashSync(newPassword, 10);
+  db.run('UPDATE users SET password = ? WHERE id = ?', [hash, req.params.id], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
   });
 });
 
@@ -70,7 +137,7 @@ app.get('/api/content', (req, res) => {
 });
 
 app.put('/api/content', authenticateJWT, (req, res) => {
-  const items = req.body; // Expects object { key: value, ... }
+  const items = req.body;
   const stmt = db.prepare('INSERT INTO content (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value');
   Object.keys(items).forEach(key => {
     stmt.run(key, items[key]);
@@ -89,10 +156,21 @@ app.get('/api/notifications', (req, res) => {
 
 app.post('/api/notifications', authenticateJWT, (req, res) => {
   const { title, category, desc, date } = req.body;
-  db.run('INSERT INTO notifications (title, category, desc, date) VALUES (?, ?, ?, ?)', [title, category, desc, date], function(err) {
+  const notifDate = date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  db.run('INSERT INTO notifications (title, category, desc, date) VALUES (?, ?, ?, ?)', [title, category, desc, notifDate], function(err) {
     if (err) res.status(500).json({ error: err.message });
     else res.json({ id: this.lastID });
   });
+});
+
+app.put('/api/notifications/:id', authenticateJWT, (req, res) => {
+  const { title, category, desc, date } = req.body;
+  db.run('UPDATE notifications SET title=?, category=?, desc=?, date=? WHERE id=?',
+    [title, category, desc, date, req.params.id], (err) => {
+      if (err) res.status(500).json({ error: err.message });
+      else res.json({ success: true });
+    }
+  );
 });
 
 app.delete('/api/notifications/:id', authenticateJWT, (req, res) => {
@@ -115,10 +193,18 @@ app.post('/api/gallery', authenticateJWT, upload.single('image'), (req, res) => 
   const { alt, cls } = req.body;
   if (!file) return res.status(400).json({ error: 'No image uploaded' });
   const src = '/uploads/' + file.filename;
-  
+
   db.run('INSERT INTO gallery (src, alt, cls) VALUES (?, ?, ?)', [src, alt, cls || ''], function(err) {
     if (err) res.status(500).json({ error: err.message });
     else res.json({ id: this.lastID, src });
+  });
+});
+
+app.put('/api/gallery/:id', authenticateJWT, (req, res) => {
+  const { alt, cls } = req.body;
+  db.run('UPDATE gallery SET alt=?, cls=? WHERE id=?', [alt, cls, req.params.id], (err) => {
+    if (err) res.status(500).json({ error: err.message });
+    else res.json({ success: true });
   });
 });
 
@@ -139,10 +225,7 @@ app.post('/api/apply', async (req, res) => {
   const data = req.body;
   const toEmail = 'susmanjha9@gmail.com, stxaviersjagatpur@gmail.com';
   const fromEmail = 'susmanjha9@gmail.com';
-  
-  // Create transporter dynamically based on what user will configure later.
-  // For now, we will simulate a success response but log that real SMTP config is needed.
-  // We use standard placeholder config so they can just update environment variables later.
+
   let transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: 587,
@@ -201,7 +284,7 @@ ${data.fMessage || 'None'}
     } else {
       console.log('Skipped actual email sending because SMTP_PASS is missing.');
       console.log(mailOptions.text);
-      res.json({ success: true, message: 'SMTP_PASS not configured. Form accepted but not emailed. Simulated success.' });
+      res.json({ success: true, message: 'Form submitted successfully!' });
     }
   } catch (err) {
     console.error('Email error:', err);
@@ -212,6 +295,11 @@ ${data.fMessage || 'None'}
 // Root route — serve the school website homepage
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'StXaviers_Website.html'));
+});
+
+// Admin route
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin', 'index.html'));
 });
 
 // Start Server

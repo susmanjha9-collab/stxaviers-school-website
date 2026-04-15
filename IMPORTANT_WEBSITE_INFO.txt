@@ -1,0 +1,50 @@
+============================================================
+   ST. XAVIER'S HIGH SCHOOL, JAGATPUR - WEBSITE INFO
+   Saved on: 12 April 2026
+============================================================
+
+WEBSITE LINK (Share this with parents & students):
+--------------------------------------------------
+https://stxaviers-school-website.onrender.com
+
+NOTE: The website works 24/7 even when your PC/laptop is OFF.
+It runs on Render.com cloud servers automatically.
+
+
+ADMIN PANEL (To manage website content):
+--------------------------------------------------
+Link     : 
+Email    : susmanjha9@gmail.com
+Password : XavierAdmin@2026
+
+From the Admin Panel you can:
+  - Add or delete Notices/Notifications
+  - Upload Gallery images
+  - Edit school content and contact info
+
+
+GITHUB (Where the website code is stored):
+--------------------------------------------------
+https://github.com/susmanjha9-collab/stxaviers-school-website
+Username : susmanjha9-collab
+
+
+RENDER.COM (Where the website is hosted for free):
+--------------------------------------------------
+https://dashboard.render.com
+
+
+IMPORTANT SLEEP NOTE:
+--------------------------------------------------
+On the free plan, if nobody visits the website for 15 minutes
+it goes to "sleep". The next visitor will wait 30-60 seconds
+for it to wake up. After that it works normally.
+This is completely free and automatic.
+
+
+FOR ANY CHANGES TO THE WEBSITE:
+--------------------------------------------------
+Contact the developer or use the Admin Panel above.
+Do NOT delete the files in this folder.
+
+============================================================

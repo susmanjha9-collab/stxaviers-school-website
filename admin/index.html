@@ -3,228 +3,1377 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard - St. Xavier's High School</title>
+  <title>Admin Dashboard – St. Xavier's High School</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
   <style>
-    :root { --navy: #071b3e; --gold: #c8880a; --bg: #f4f6f9; --white: #fff; --text: #333; --border: #e2e8f0; }
-    body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: var(--bg); color: var(--text); }
-    header { background: var(--navy); color: var(--white); padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { margin: 0; font-size: 20px; color: var(--gold); }
-    .logout-btn { background: none; border: 1px solid var(--gold); color: var(--gold); padding: 8px 16px; cursor: pointer; border-radius: 4px; }
-    .container { display: flex; min-height: calc(100vh - 68px); }
-    .sidebar { width: 250px; background: var(--white); border-right: 1px solid var(--border); }
-    .nav-btn { display: block; width: 100%; padding: 15px 20px; text-align: left; background: none; border: none; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 16px; }
-    .nav-btn.active, .nav-btn:hover { background: var(--bg); color: var(--navy); border-left: 4px solid var(--gold); font-weight: bold; }
-    .main-content { flex: 1; padding: 30px; }
-    .section { display: none; background: var(--white); padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .section.active { display: block; }
-    h2 { margin-top: 0; border-bottom: 2px solid var(--gold); padding-bottom: 10px; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    input, textarea, select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 10px; }
-    button.btn { background: var(--gold); color: var(--white); border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; }
-    button.btn:hover { background: #b17909; }
-    button.btn-danger { background: #dc3545; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 4px; font-size: 12px;}
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { padding: 12px; border: 1px solid var(--border); text-align: left; }
-    th { background: var(--bg); }
-    
-    #loginScreen { position: fixed; inset: 0; background: var(--navy); display: flex; align-items: center; justify-content: center; z-index: 999; }
-    .login-box { background: white; padding: 40px; border-radius: 8px; width: 300px; text-align: center; }
-    .login-box h2 { color: var(--navy); }
+    :root {
+      --navy: #071b3e;
+      --navy2: #0d2a55;
+      --royal: #1a4090;
+      --gold: #c8880a;
+      --gold-light: #f0b429;
+      --gold-pale: #fffbf0;
+      --bg: #f0f3f8;
+      --bg2: #e8ecf5;
+      --white: #ffffff;
+      --text: #1e293b;
+      --gray: #64748b;
+      --border: #e2e8f0;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --shadow: 0 4px 24px rgba(7,27,62,.09);
+      --shadow-lg: 0 10px 40px rgba(7,27,62,.14);
+      --sidebar-w: 270px;
+      --radius: 16px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(7,27,62,.18); border-radius:10px; }
+
+    /* ═══════ LOGIN SCREEN ═══════ */
+    #loginScreen {
+      position:fixed; inset:0;
+      background:linear-gradient(160deg, #04112a 0%, #071b3e 45%, #0d3278 100%);
+      display:flex; align-items:center; justify-content:center; z-index:9999;
+      padding:20px;
+    }
+    #loginScreen::before {
+      content:''; position:absolute; inset:0;
+      background-image: linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+      background-size:56px 56px; pointer-events:none;
+    }
+    .login-card {
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(200,136,10,.2);
+      backdrop-filter:blur(24px);
+      border-radius:28px; padding:52px 44px;
+      width:100%; max-width:440px; position:relative; z-index:1;
+      box-shadow:0 32px 80px rgba(0,0,0,.4);
+    }
+    .login-logo {
+      width:80px; height:80px; border-radius:50%;
+      border:2.5px solid rgba(200,136,10,.5);
+      background:rgba(200,136,10,.08);
+      display:flex; align-items:center; justify-content:center;
+      margin:0 auto 28px;
+      font-family:'Playfair Display',serif; font-size:38px; font-weight:900;
+      color:var(--gold-light);
+      box-shadow:0 0 0 8px rgba(200,136,10,.06), 0 0 40px rgba(200,136,10,.15);
+    }
+    .login-card h1 {
+      font-family:'Playfair Display',serif; font-size:26px; color:#fff;
+      text-align:center; margin-bottom:6px;
+    }
+    .login-card .login-sub {
+      font-size:12.5px; color:rgba(255,255,255,.4); text-align:center; margin-bottom:36px;
+      letter-spacing:.04em;
+    }
+    .login-field { margin-bottom:18px; }
+    .login-field label {
+      display:block; font-size:11.5px; font-weight:700; color:rgba(255,255,255,.55);
+      letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px;
+    }
+    .login-field input {
+      width:100%; padding:14px 18px;
+      background:rgba(255,255,255,.06);
+      border:1.5px solid rgba(255,255,255,.1);
+      border-radius:12px; color:#fff; font-size:14.5px; font-family:'Inter',sans-serif;
+      outline:none; transition:.2s;
+    }
+    .login-field input::placeholder { color:rgba(255,255,255,.25); }
+    .login-field input:focus {
+      border-color:rgba(200,136,10,.6);
+      background:rgba(200,136,10,.06);
+    }
+    #lErr {
+      background:rgba(220,38,38,.15); border:1px solid rgba(220,38,38,.3);
+      color:#fca5a5; font-size:13px; padding:10px 14px; border-radius:10px;
+      margin-bottom:16px; display:none; text-align:center;
+    }
+    .btn-login {
+      width:100%; padding:15px;
+      background:linear-gradient(135deg, var(--gold), #e0a010);
+      color:var(--navy); font-weight:800; font-size:15px; font-family:'Inter',sans-serif;
+      border:none; border-radius:12px; cursor:pointer; transition:.3s;
+      box-shadow:0 6px 28px rgba(200,136,10,.4); letter-spacing:.02em;
+    }
+    .btn-login:hover { transform:translateY(-2px); box-shadow:0 12px 40px rgba(200,136,10,.55); }
+    .login-info {
+      margin-top:24px; text-align:center;
+      font-size:12px; color:rgba(255,255,255,.28); line-height:1.8;
+    }
+    .login-spinner { display:none; }
+    .btn-login.loading .btn-text { display:none; }
+    .btn-login.loading .login-spinner { display:inline; }
+
+    /* ═══════ SIDEBAR ═══════ */
+    .sidebar {
+      position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-w);
+      background:var(--navy);
+      background-image:linear-gradient(180deg, #071b3e 0%, #04112a 100%);
+      z-index:200; display:flex; flex-direction:column; overflow:hidden;
+      transition:.3s;
+    }
+    .sidebar-header {
+      padding:28px 24px 22px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      flex-shrink:0;
+    }
+    .sidebar-brand {
+      display:flex; align-items:center; gap:12px;
+    }
+    .sidebar-logo {
+      width:44px; height:44px; border-radius:50%;
+      border:2px solid rgba(200,136,10,.5);
+      background:rgba(200,136,10,.1);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Playfair Display',serif; font-size:20px; font-weight:900;
+      color:var(--gold-light); flex-shrink:0;
+    }
+    .sidebar-brand-text .brand-name {
+      font-size:13.5px; font-weight:700; color:#fff; line-height:1.2;
+    }
+    .sidebar-brand-text .brand-sub {
+      font-size:10px; color:rgba(255,255,255,.35); letter-spacing:.08em; margin-top:2px;
+    }
+    .sidebar-admin-badge {
+      margin-top:12px;
+      background:rgba(200,136,10,.1);
+      border:1px solid rgba(200,136,10,.2);
+      border-radius:8px; padding:8px 12px;
+      font-size:11px; color:rgba(255,255,255,.5);
+    }
+    .sidebar-admin-badge span {
+      display:block; color:var(--gold-light); font-weight:600; font-size:12px;
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    }
+    .sidebar-nav { flex:1; overflow-y:auto; padding:16px 12px; }
+    .nav-section-label {
+      font-size:9.5px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+      color:rgba(255,255,255,.25); padding:16px 12px 8px; display:block;
+    }
+    .nav-item {
+      display:flex; align-items:center; gap:12px;
+      padding:11px 14px; border-radius:10px;
+      color:rgba(255,255,255,.5); font-size:13.5px; font-weight:500;
+      cursor:pointer; transition:.18s; border:none; background:none;
+      width:100%; text-align:left; margin-bottom:2px;
+    }
+    .nav-item .nav-icon { font-size:16px; width:20px; text-align:center; flex-shrink:0; }
+    .nav-item:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.85); }
+    .nav-item.active {
+      background:linear-gradient(135deg, rgba(200,136,10,.18), rgba(200,136,10,.08));
+      color:var(--gold-light); font-weight:600;
+      border:1px solid rgba(200,136,10,.2);
+    }
+    .nav-item.active .nav-icon { filter:none; }
+    .sidebar-footer {
+      padding:16px 12px;
+      border-top:1px solid rgba(255,255,255,.07);
+      flex-shrink:0;
+    }
+    .btn-logout {
+      display:flex; align-items:center; gap:10px;
+      padding:11px 14px; border-radius:10px;
+      color:rgba(255,255,255,.45); font-size:13px; font-weight:500;
+      cursor:pointer; border:1px solid transparent; background:none; width:100%;
+      transition:.2s;
+    }
+    .btn-logout:hover {
+      background:rgba(220,38,38,.1); border-color:rgba(220,38,38,.2);
+      color:#fca5a5;
+    }
+
+    /* ═══════ MAIN LAYOUT ═══════ */
+    .main-wrapper {
+      margin-left:var(--sidebar-w);
+      min-height:100vh;
+      display:flex; flex-direction:column;
+    }
+    .topbar {
+      background:var(--white); border-bottom:1px solid var(--border);
+      padding:0 32px; height:64px;
+      display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+      box-shadow:0 1px 12px rgba(7,27,62,.06);
+    }
+    .topbar-title { font-size:17px; font-weight:700; color:var(--navy); }
+    .topbar-title span { color:var(--gold); }
+    .topbar-actions { display:flex; align-items:center; gap:12px; }
+    .topbar-time {
+      font-size:12px; color:var(--gray); background:var(--bg);
+      padding:6px 14px; border-radius:8px; border:1px solid var(--border);
+    }
+    .view-site-btn {
+      display:inline-flex; align-items:center; gap:7px;
+      padding:9px 18px; border-radius:10px;
+      background:linear-gradient(135deg, var(--navy), var(--royal));
+      color:#fff; font-size:13px; font-weight:600; text-decoration:none;
+      transition:.2s; box-shadow:0 4px 14px rgba(7,27,62,.2);
+    }
+    .view-site-btn:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(7,27,62,.3); }
+    .main-content { flex:1; padding:32px; }
+
+    /* ═══════ SECTION PANELS ═══════ */
+    .panel { display:none; animation:fadeIn .25s ease; }
+    .panel.active { display:block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+    .panel-header { margin-bottom:28px; }
+    .panel-header h2 {
+      font-family:'Playfair Display',serif; font-size:28px; font-weight:900;
+      color:var(--navy); margin-bottom:6px;
+    }
+    .panel-header p { font-size:13.5px; color:var(--gray); }
+
+    /* ═══════ STATS CARDS (DASHBOARD) ═══════ */
+    .dashboard-stats {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:28px;
+    }
+    .stat-card {
+      background:var(--white); border-radius:var(--radius);
+      padding:24px; border:1px solid var(--border);
+      box-shadow:var(--shadow); display:flex; flex-direction:column; gap:8px;
+      transition:.2s;
+    }
+    .stat-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+    .stat-card .stat-icon {
+      width:48px; height:48px; border-radius:14px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; margin-bottom:4px;
+    }
+    .stat-card .stat-num {
+      font-family:'Playfair Display',serif; font-size:34px; font-weight:900;
+      color:var(--navy); line-height:1;
+    }
+    .stat-card .stat-label { font-size:12px; color:var(--gray); font-weight:500; }
+    .stat-gold .stat-icon { background:rgba(200,136,10,.1); }
+    .stat-blue .stat-icon { background:var(--blue-bg); }
+    .stat-green .stat-icon { background:var(--green-bg); }
+    .stat-red .stat-icon { background:var(--red-bg); }
+
+    /* ═══════ CARD COMPONENT ═══════ */
+    .card {
+      background:var(--white); border-radius:var(--radius);
+      border:1px solid var(--border); box-shadow:var(--shadow);
+      overflow:hidden; margin-bottom:24px;
+    }
+    .card-header {
+      padding:20px 24px; border-bottom:1px solid var(--border);
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    }
+    .card-header h3 { font-size:16px; font-weight:700; color:var(--navy); display:flex; align-items:center; gap:8px; }
+    .card-body { padding:24px; }
+    .card-body.no-pad { padding:0; }
+
+    /* ═══════ FORM ELEMENTS ═══════ */
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .form-grid.one { grid-template-columns:1fr; }
+    .form-grid.three { grid-template-columns:1fr 1fr 1fr; }
+    .form-group { display:flex; flex-direction:column; gap:6px; }
+    .form-group label {
+      font-size:11.5px; font-weight:700; color:var(--navy);
+      letter-spacing:.04em; text-transform:uppercase;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      padding:11px 15px; border:1.5px solid var(--border);
+      border-radius:10px; font-size:14px; font-family:'Inter',sans-serif;
+      color:var(--text); background:var(--bg); outline:none; transition:.2s;
+      width:100%;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color:var(--gold); background:var(--white);
+      box-shadow:0 0 0 3px rgba(200,136,10,.08);
+    }
+    .form-group textarea { min-height:90px; resize:vertical; }
+    .form-group .field-hint { font-size:11px; color:var(--gray); margin-top:2px; }
+
+    /* ═══════ BUTTONS ═══════ */
+    .btn { display:inline-flex; align-items:center; gap:8px; border:none; cursor:pointer; font-family:'Inter',sans-serif; font-weight:600; border-radius:10px; transition:.2s; }
+    .btn-primary { background:linear-gradient(135deg, var(--gold), #d99610); color:var(--navy); padding:10px 20px; font-size:13.5px; box-shadow:0 4px 14px rgba(200,136,10,.25); }
+    .btn-primary:hover { transform:translateY(-1px); box-shadow:0 7px 22px rgba(200,136,10,.4); }
+    .btn-secondary { background:var(--bg); color:var(--navy); padding:10px 20px; font-size:13.5px; border:1.5px solid var(--border); }
+    .btn-secondary:hover { border-color:var(--navy); background:var(--bg2); }
+    .btn-danger { background:var(--red-bg); color:var(--red); padding:8px 14px; font-size:12.5px; border:1px solid rgba(220,38,38,.2); }
+    .btn-danger:hover { background:var(--red); color:#fff; }
+    .btn-success { background:var(--green-bg); color:var(--green); padding:8px 14px; font-size:12.5px; border:1px solid rgba(22,163,74,.2); }
+    .btn-success:hover { background:var(--green); color:#fff; }
+    .btn-sm { padding:6px 12px; font-size:12px; border-radius:8px; }
+    .btn-icon { padding:8px; border-radius:8px; }
+
+    /* ═══════ TABLE ═══════ */
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; }
+    th {
+      background:var(--bg); font-size:11px; font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--gray); padding:13px 18px; text-align:left;
+      border-bottom:2px solid var(--border); white-space:nowrap;
+    }
+    td { padding:14px 18px; font-size:13.5px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(200,136,10,.025); }
+    .td-actions { display:flex; gap:8px; align-items:center; }
+
+    /* ═══════ BADGE ═══════ */
+    .badge { font-size:11px; font-weight:700; padding:4px 12px; border-radius:50px; display:inline-block; }
+    .badge-gold { background:rgba(200,136,10,.12); color:var(--gold); border:1px solid rgba(200,136,10,.2); }
+    .badge-blue { background:var(--blue-bg); color:var(--blue); border:1px solid rgba(37,99,235,.15); }
+    .badge-green { background:var(--green-bg); color:var(--green); border:1px solid rgba(22,163,74,.15); }
+    .badge-red { background:var(--red-bg); color:var(--red); border:1px solid rgba(220,38,38,.15); }
+    .badge-gray { background:var(--bg); color:var(--gray); border:1px solid var(--border); }
+
+    /* ═══════ TOAST ═══════ */
+    #toast {
+      position:fixed; bottom:28px; right:28px; z-index:9999;
+      background:var(--navy); color:#fff; padding:14px 22px; border-radius:12px;
+      font-size:13.5px; font-weight:500; box-shadow:var(--shadow-lg);
+      display:flex; align-items:center; gap:10px;
+      transform:translateY(100px); opacity:0;
+      transition:.35s cubic-bezier(.34,1.56,.64,1);
+      pointer-events:none;
+    }
+    #toast.show { transform:translateY(0); opacity:1; }
+    #toast.toast-success { background:linear-gradient(135deg, #15803d, #16a34a); }
+    #toast.toast-error { background:linear-gradient(135deg, #b91c1c, #dc2626); }
+
+    /* ═══════ GALLERY GRID ═══════ */
+    .gallery-admin-grid {
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:14px;
+    }
+    .gallery-item {
+      border-radius:12px; overflow:hidden; border:2px solid var(--border);
+      transition:.2s; position:relative; background:var(--bg);
+    }
+    .gallery-item:hover { border-color:var(--gold); box-shadow:var(--shadow); }
+    .gallery-item img { width:100%; height:140px; object-fit:cover; display:block; }
+    .gallery-item-info { padding:10px 12px; }
+    .gallery-item-info p { font-size:12px; color:var(--gray); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:6px; }
+    .gallery-item-actions { display:flex; gap:6px; }
+    .gallery-cls-badge { position:absolute; top:8px; right:8px; }
+
+    /* ═══════ CONTENT TABS ═══════ */
+    .content-tabs { display:flex; gap:4px; margin-bottom:24px; flex-wrap:wrap; }
+    .ctab {
+      padding:9px 18px; border-radius:10px; font-size:13px; font-weight:600;
+      cursor:pointer; border:1.5px solid var(--border); background:var(--white);
+      color:var(--gray); transition:.18s;
+    }
+    .ctab.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+    .ctab:hover:not(.active) { border-color:var(--gold); color:var(--gold); }
+    .ctab-panel { display:none; }
+    .ctab-panel.active { display:block; }
+
+    /* ═══════ SECTION HEADER (inside content) ═══════ */
+    .section-label {
+      font-size:10px; font-weight:800; letter-spacing:.2em; text-transform:uppercase;
+      color:var(--gold); padding:16px 0 10px; margin-bottom:16px;
+      border-bottom:1.5px solid var(--border); display:flex; align-items:center; gap:8px;
+    }
+    .section-label::before { content:''; width:20px; height:2px; background:var(--gold); border-radius:2px; }
+
+    /* ═══════ UPLOAD AREA ═══════ */
+    .upload-zone {
+      border:2px dashed var(--border); border-radius:14px; padding:32px 24px;
+      text-align:center; transition:.2s; cursor:pointer; background:var(--bg);
+    }
+    .upload-zone:hover, .upload-zone.dragover { border-color:var(--gold); background:var(--gold-pale); }
+    .upload-zone .upload-icon { font-size:40px; margin-bottom:12px; display:block; }
+    .upload-zone p { font-size:13px; color:var(--gray); }
+    .upload-zone input[type=file] { display:none; }
+
+    /* ═══════ SWITCH TOGGLE ═══════ */
+    .switch { display:flex; align-items:center; gap:10px; font-size:13.5px; font-weight:500; }
+    .switch-input { display:none; }
+    .switch-track {
+      width:42px; height:24px; background:var(--border); border-radius:50px; cursor:pointer;
+      position:relative; transition:.25s; flex-shrink:0;
+    }
+    .switch-track::before {
+      content:''; position:absolute; top:3px; left:3px;
+      width:18px; height:18px; border-radius:50%;
+      background:var(--white); transition:.25s; box-shadow:0 1px 4px rgba(0,0,0,.2);
+    }
+    .switch-input:checked + .switch-track { background:var(--green); }
+    .switch-input:checked + .switch-track::before { left:21px; }
+
+    /* ═══════ ALERT BOX ═══════ */
+    .alert { border-radius:10px; padding:14px 18px; font-size:13px; margin-bottom:16px; display:flex; gap:10px; align-items:flex-start; }
+    .alert-info { background:var(--blue-bg); border:1px solid rgba(37,99,235,.2); color:var(--blue); }
+    .alert-warning { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.2); color:#92400e; }
+    .alert-success { background:var(--green-bg); border:1px solid rgba(22,163,74,.2); color:#15803d; }
+
+    /* ═══════ PASSWORD MODAL ═══════ */
+    .modal-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(7,27,62,.5); backdrop-filter:blur(4px);
+      z-index:8888; align-items:center; justify-content:center; padding:20px;
+    }
+    .modal-overlay.open { display:flex; }
+    .modal-box {
+      background:var(--white); border-radius:20px; padding:36px;
+      max-width:460px; width:100%; box-shadow:var(--shadow-lg); position:relative;
+    }
+    .modal-box h3 { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+    .modal-box p { font-size:13px; color:var(--gray); margin-bottom:24px; }
+    .modal-close {
+      position:absolute; top:16px; right:16px; border:none; background:var(--bg);
+      color:var(--gray); width:32px; height:32px; border-radius:50%; font-size:18px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.2s;
+    }
+    .modal-close:hover { background:var(--border); }
+
+    /* ═══════ EMPTY STATE ═══════ */
+    .empty-state {
+      text-align:center; padding:60px 24px;
+      color:var(--gray); font-size:14px;
+    }
+    .empty-state .empty-icon { font-size:52px; margin-bottom:16px; display:block; opacity:.5; }
+    .empty-state h4 { font-size:16px; font-weight:600; color:var(--navy); margin-bottom:6px; }
+
+    /* ═══════ LOADING ═══════ */
+    .loading-spinner {
+      display:flex; align-items:center; justify-content:center; padding:40px;
+      color:var(--gray); gap:12px; font-size:14px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .spin { animation:spin .8s linear infinite; }
+
+    /* ═══════ RESPONSIVE ═══════ */
+    @media (max-width:900px) {
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .main-wrapper { margin-left:0; }
+      .dashboard-stats { grid-template-columns:1fr 1fr; }
+      .form-grid { grid-template-columns:1fr; }
+      .form-grid.three { grid-template-columns:1fr; }
+      .mob-menu-btn { display:flex !important; }
+    }
+    .mob-menu-btn {
+      display:none; align-items:center; justify-content:center;
+      background:var(--bg); border:1px solid var(--border); border-radius:8px;
+      width:40px; height:40px; cursor:pointer; font-size:20px;
+    }
+    .sidebar-overlay {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,.4);
+      z-index:199; backdrop-filter:blur(2px);
+    }
+    .sidebar-overlay.open { display:block; }
   </style>
 </head>
 <body>
 
+<!-- ═══════════════════ LOGIN SCREEN ═══════════════════ -->
 <div id="loginScreen">
-  <div class="login-box">
-    <h2>Admin Login</h2>
-    <input type="email" id="lEmail" placeholder="Admin Email" />
-    <input type="password" id="lPass" placeholder="Password" />
-    <p id="lErr" style="color:red; display:none;">Invalid credentials</p>
-    <button class="btn" style="width:100%;" onclick="login()">Login</button>
+  <div class="login-card">
+    <div class="login-logo">X</div>
+    <h1>Admin Dashboard</h1>
+    <p class="login-sub">St. Xavier's High School, Jagatpur</p>
+    <div class="login-field">
+      <label>Email Address</label>
+      <input type="email" id="lEmail" placeholder="admin@example.com" autocomplete="email"/>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="lPass" placeholder="Your password" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')login()"/>
+    </div>
+    <div id="lErr">⚠️ Invalid email or password. Please try again.</div>
+    <button class="btn-login" onclick="login()" id="loginBtn">
+      <span class="btn-text">Sign In →</span>
+      <span class="login-spinner">⏳ Signing in...</span>
+    </button>
+    <p class="login-info">Only authorised school administrators can access this panel.<br>Contact the school developer if you need access.</p>
   </div>
 </div>
 
-<header>
-  <h1>CMS Dashboard</h1>
-  <div>
-    <button class="logout-btn" onclick="logout()">Logout</button>
+<!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeMobSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <div class="sidebar-logo">X</div>
+      <div class="sidebar-brand-text">
+        <div class="brand-name">St. Xavier's</div>
+        <div class="brand-sub">Admin Dashboard</div>
+      </div>
+    </div>
+    <div class="sidebar-admin-badge">
+      Logged in as<br>
+      <span id="adminEmailDisplay">—</span>
+    </div>
   </div>
-</header>
-<div class="container">
-  <div class="sidebar">
-    <button class="nav-btn active" onclick="showTab('content')">Text Contents</button>
-    <button class="nav-btn" onclick="showTab('notifications')">Notifications</button>
-    <button class="nav-btn" onclick="showTab('gallery')">Gallery</button>
+
+  <nav class="sidebar-nav">
+    <span class="nav-section-label">Overview</span>
+    <button class="nav-item active" onclick="showPanel('dashboard')" id="nav-dashboard">
+      <span class="nav-icon">🏠</span> Dashboard
+    </button>
+
+    <span class="nav-section-label">Website Content</span>
+    <button class="nav-item" onclick="showPanel('content')" id="nav-content">
+      <span class="nav-icon">✏️</span> Edit All Content
+    </button>
+    <button class="nav-item" onclick="showPanel('notifications')" id="nav-notifications">
+      <span class="nav-icon">📢</span> Notifications
+    </button>
+    <button class="nav-item" onclick="showPanel('gallery')" id="nav-gallery">
+      <span class="nav-icon">🖼️</span> Photo Gallery
+    </button>
+
+    <span class="nav-section-label">Settings</span>
+    <button class="nav-item" onclick="showPanel('admins')" id="nav-admins">
+      <span class="nav-icon">👥</span> Admin Users
+    </button>
+    <button class="nav-item" onclick="showPanel('password')" id="nav-password">
+      <span class="nav-icon">🔐</span> Change Password
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="btn-logout" onclick="logout()">
+      <span>🚪</span> Sign Out
+    </button>
   </div>
-  
-  <div class="main-content">
-    
-    <!-- Text Content -->
-    <div id="content" class="section active">
-      <h2>Edit Website Content</h2>
-      <div id="contentForms">Loading...</div>
-      <button class="btn" onclick="saveContent()">Save All Content</button>
+</aside>
+
+<!-- ═══════════════════ MAIN ═══════════════════ -->
+<div class="main-wrapper">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <button class="mob-menu-btn" onclick="openMobSidebar()">☰</button>
+      <div class="topbar-title">CMS <span>Dashboard</span></div>
+    </div>
+    <div class="topbar-actions">
+      <div class="topbar-time" id="liveClock">--:-- --</div>
+      <a href="/" target="_blank" class="view-site-btn">🌐 View Website</a>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- ══════ DASHBOARD ══════ -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="panel-header">
+        <h2>Welcome Back! 👋</h2>
+        <p>Here's an overview of your school website's content.</p>
+      </div>
+      <div class="dashboard-stats">
+        <div class="stat-card stat-gold">
+          <div class="stat-icon">📢</div>
+          <div class="stat-num" id="dash-notif-count">—</div>
+          <div class="stat-label">Notifications Published</div>
+        </div>
+        <div class="stat-card stat-blue">
+          <div class="stat-icon">🖼️</div>
+          <div class="stat-num" id="dash-gallery-count">—</div>
+          <div class="stat-label">Gallery Images</div>
+        </div>
+        <div class="stat-card stat-green">
+          <div class="stat-icon">👥</div>
+          <div class="stat-num" id="dash-admin-count">—</div>
+          <div class="stat-label">Admin Users</div>
+        </div>
+        <div class="stat-card stat-red">
+          <div class="stat-icon">✏️</div>
+          <div class="stat-num" id="dash-content-count">—</div>
+          <div class="stat-label">Editable Content Fields</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <div class="card">
+          <div class="card-header"><h3>⚡ Quick Actions</h3></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <button class="btn btn-primary" style="justify-content:flex-start;" onclick="showPanel('notifications')">📢 Add New Notification</button>
+              <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="showPanel('gallery')">🖼️ Upload Gallery Photo</button>
+              <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="showPanel('content')">✏️ Edit Website Content</button>
+              <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="showPanel('admins')">👥 Manage Admin Users</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>ℹ️ Website Info</h3></div>
+          <div class="card-body">
+            <div style="font-size:13.5px;line-height:2;color:var(--gray);">
+              <p>🌐 <strong style="color:var(--navy);">Live URL:</strong><br>
+              <a href="https://stxaviers-school-website.onrender.com" target="_blank" style="color:var(--blue);font-weight:600;font-size:12.5px;">stxaviers-school-website.onrender.com</a></p>
+              <br>
+              <p>📌 <strong style="color:var(--navy);">Hosting:</strong> Render.com (Free Plan)</p>
+              <p>💤 <strong style="color:var(--navy);">Note:</strong> May sleep after 15min of inactivity. First visitor waits ~60s for wake-up.</p>
+              <br>
+              <p>🔧 <strong style="color:var(--navy);">GitHub:</strong><br>
+              <a href="https://github.com/susmanjha9-collab/stxaviers-school-website" target="_blank" style="color:var(--blue);font-size:12px;">susmanjha9-collab/stxaviers-school-website</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Notifications -->
-    <div id="notifications" class="section">
-      <h2>Manage Notifications</h2>
-      <div style="background: var(--bg); padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-        <h3>Add New</h3>
-        <select id="nCat"><option>Admission</option><option>Academics</option><option>Event</option><option>Exam</option><option>General</option></select>
-        <input type="text" id="nTitle" placeholder="Title"/>
-        <textarea id="nDesc" placeholder="Description"></textarea>
-        <button class="btn" onclick="addNotif()">Add Notification</button>
+    <!-- ══════ EDIT CONTENT ══════ -->
+    <div class="panel" id="panel-content">
+      <div class="panel-header">
+        <h2>Edit Website Content ✏️</h2>
+        <p>Make changes to any text visible on the school website. Press "Save" after editing each section.</p>
       </div>
-      <table id="notifTable">
-        <thead><tr><th>Date</th><th>Category</th><th>Title</th><th>Actions</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <div class="content-tabs">
+        <button class="ctab active" onclick="switchCtab('school',this)">🏫 School Info</button>
+        <button class="ctab" onclick="switchCtab('hero',this)">🌟 Hero &amp; Stats</button>
+        <button class="ctab" onclick="switchCtab('about',this)">📖 About Us</button>
+        <button class="ctab" onclick="switchCtab('contact',this)">📞 Contact</button>
+        <button class="ctab" onclick="switchCtab('ticker',this)">📰 News Ticker</button>
+        <button class="ctab" onclick="switchCtab('timings',this)">🕐 Timings</button>
+        <button class="ctab" onclick="switchCtab('admission',this)">🎓 Admission</button>
+      </div>
+
+      <!-- School Info -->
+      <div class="ctab-panel active" id="ctab-school">
+        <div class="card">
+          <div class="card-header">
+            <h3>🏫 School Identity</h3>
+            <button class="btn btn-primary" onclick="saveContentGroup('school')">💾 Save School Info</button>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group"><label>School Name</label><input id="c_school_name" placeholder="St. Xavier's High School"/></div>
+              <div class="form-group"><label>Sub-title / Tagline Line</label><input id="c_school_sub" placeholder="Jagatpur · Cuttack · CBSE Affiliated"/></div>
+              <div class="form-group"><label>Year Established</label><input id="c_school_estd" placeholder="2017"/></div>
+              <div class="form-group"><label>Affiliation</label><input id="c_school_affiliation" placeholder="CBSE Affiliated"/></div>
+              <div class="form-group"><label>Classes Offered</label><input id="c_school_classes" placeholder="Nursery to Class VIII"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero & Stats -->
+      <div class="ctab-panel" id="ctab-hero">
+        <div class="card">
+          <div class="card-header">
+            <h3>🌟 Hero Section &amp; Statistics</h3>
+            <button class="btn btn-primary" onclick="saveContentGroup('hero')">💾 Save Hero &amp; Stats</button>
+          </div>
+          <div class="card-body">
+            <div class="section-label">Hero Text</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Hero Badge Text</label><input id="c_hero_badge" placeholder="✦ Admissions Open · 2026-27"/></div>
+              <div class="form-group"><label>Hero Tagline (italic quote)</label><input id="c_hero_tagline" placeholder='"Empowering Minds, Enriching Lives"'/></div>
+              <div class="form-group form-grid one" style="grid-column:1/-1;"><label>Location Text (below title)</label><input id="c_hero_location" placeholder="Gopabandhu Nagar, Jagatpur · Cuttack, Odisha"/></div>
+              <div class="form-group" style="grid-column:1/-1;"><label>Hero Description Paragraph</label><textarea id="c_hero_desc"></textarea></div>
+            </div>
+            <div class="section-label">Statistics Numbers (shown in hero &amp; strip)</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Years of Excellence</label><input id="c_stat_years" placeholder="8" type="number"/></div>
+              <div class="form-group"><label>Students Enrolled</label><input id="c_stat_students" placeholder="200" type="number"/></div>
+              <div class="form-group"><label>Expert Faculty Count</label><input id="c_stat_faculty" placeholder="30" type="number"/></div>
+              <div class="form-group"><label>Pass Rate (with % symbol)</label><input id="c_stat_passrate" placeholder="100%"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="ctab-panel" id="ctab-about">
+        <div class="card">
+          <div class="card-header">
+            <h3>📖 About Us Section</h3>
+            <button class="btn btn-primary" onclick="saveContentGroup('about')">💾 Save About Us</button>
+          </div>
+          <div class="card-body">
+            <div class="section-label">Our Story &amp; Description</div>
+            <div class="form-grid one">
+              <div class="form-group"><label>Our Story (About Card text)</label><textarea id="c_about_story" rows="4"></textarea></div>
+              <div class="form-group"><label>About Us Description (right column)</label><textarea id="c_about_desc" rows="4"></textarea></div>
+            </div>
+            <div class="section-label">Mission, Vision, Values, Promise</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Our Mission</label><textarea id="c_about_mission"></textarea></div>
+              <div class="form-group"><label>Our Vision</label><textarea id="c_about_vision"></textarea></div>
+              <div class="form-group"><label>Our Values</label><textarea id="c_about_values"></textarea></div>
+              <div class="form-group"><label>Our Promise</label><textarea id="c_about_promise"></textarea></div>
+            </div>
+            <div class="section-label">Principal's Quote</div>
+            <div class="form-grid one">
+              <div class="form-group"><label>Principal's Quote</label><textarea id="c_principal_quote" rows="3"></textarea></div>
+              <div class="form-group"><label>Principal's Name / Designation (below quote)</label><input id="c_principal_name" placeholder="Principal, St. Xavier's High School, Jagatpur"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact -->
+      <div class="ctab-panel" id="ctab-contact">
+        <div class="card">
+          <div class="card-header">
+            <h3>📞 Contact Information</h3>
+            <button class="btn btn-primary" onclick="saveContentGroup('contact')">💾 Save Contact Info</button>
+          </div>
+          <div class="card-body">
+            <div class="section-label">Phone &amp; Email</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Primary Phone</label><input id="c_contact_phone" placeholder="+91 90406 10680"/></div>
+              <div class="form-group"><label>Secondary Phone (optional)</label><input id="c_contact_phone2" placeholder="Leave blank if none"/></div>
+              <div class="form-group"><label>Primary Email</label><input id="c_contact_email" type="email" placeholder="susmanjha9@gmail.com"/></div>
+              <div class="form-group"><label>Secondary Email</label><input id="c_contact_email2" type="email" placeholder="stxaviersjagatpur@gmail.com"/></div>
+            </div>
+            <div class="section-label">Address &amp; Office</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Street Address</label><input id="c_contact_address" placeholder="Gopabandhu Nagar, Jagatpur, Cuttack"/></div>
+              <div class="form-group"><label>State &amp; PIN</label><input id="c_contact_state" placeholder="Odisha – 754021"/></div>
+              <div class="form-group"><label>Office Hours</label><input id="c_contact_office_hours" placeholder="8:00 AM – 4:00 PM, Monday to Saturday"/></div>
+              <div class="form-group"><label>Google Maps Link (Opens Maps button)</label><input id="c_contact_maps_link" placeholder="https://maps.google.com/?q=..."/></div>
+            </div>
+            <div class="section-label">Google Maps Embed</div>
+            <div class="form-grid one">
+              <div class="form-group">
+                <label>Maps Embed URL (the src="" part of the iframe code)</label>
+                <textarea id="c_contact_map_embed" rows="3" placeholder="https://www.google.com/maps/embed?pb=..."></textarea>
+                <p class="field-hint">Go to Google Maps → Share → Embed a Map → Copy the src="" URL only</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ticker -->
+      <div class="ctab-panel" id="ctab-ticker">
+        <div class="card">
+          <div class="card-header">
+            <h3>📰 News Ticker (Scrolling Banner)</h3>
+            <button class="btn btn-primary" onclick="saveContentGroup('ticker')">💾 Save Ticker</button>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info">💡 Separate each ticker item with a pipe ( | ) character. Example: <strong>Item 1 | Item 2 | Item 3</strong></div>
+            <div class="form-grid one">
+              <div class="form-group">
+                <label>Ticker Items (separate with |)</label>
+                <textarea id="c_ticker_text" rows="5" placeholder="Admissions Open for 2026-27 | Sports Meet – December 2025 | ..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timings -->
+      <div class="ctab-panel" id="ctab-timings">
+        <div class="card">
+          <div class="card-header">
+            <h3>🕐 School Timings</h3>
+            <button class="btn btn-primary" onclick="saveContentGroup('timings')">💾 Save Timings</button>
+          </div>
+          <div class="card-body">
+            <div class="section-label">Morning Session (Nursery – Class III)</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Class Range Label</label><input id="c_timing_morning_classes" placeholder="Mont-I to Class III · Mon–Sat"/></div>
+              <div class="form-group"><label>Timing</label><input id="c_timing_morning_time" placeholder="7:00 AM – 10:30 AM"/></div>
+            </div>
+            <div class="section-label">Day Session (Class IV – VIII)</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Class Range Label</label><input id="c_timing_day_classes" placeholder="Class IV to Class VIII · Mon–Sat"/></div>
+              <div class="form-group"><label>Timing</label><input id="c_timing_day_time" placeholder="10:45 AM – 2:30 PM"/></div>
+            </div>
+            <div class="section-label">Office Hours</div>
+            <div class="form-grid">
+              <div class="form-group"><label>Office Timing</label><input id="c_timing_office_time" placeholder="8:00 AM – 4:00 PM"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admission -->
+      <div class="ctab-panel" id="ctab-admission">
+        <div class="card">
+          <div class="card-header">
+            <h3>🎓 Admission Settings</h3>
+            <button class="btn btn-primary" onclick="saveContentGroup('admission')">💾 Save Admission</button>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group"><label>Academic Year (e.g. 2026-27)</label><input id="c_admission_year" placeholder="2026-27"/></div>
+              <div class="form-group"><label>Admission CTA Banner Text</label><input id="c_admission_cta_text" placeholder="🎓 Admissions Open 2026-27"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Gallery -->
-    <div id="gallery" class="section">
-      <h2>Manage Gallery</h2>
-       <div style="background: var(--bg); padding: 15px; margin-bottom: 20px; border-radius: 4px;">
-        <h3>Upload Image</h3>
-        <input type="file" id="gFile" accept="image/*" />
-        <input type="text" id="gAlt" placeholder="Short description (Alt text)"/>
-        <select id="gCls"><option value="">Standard Size</option><option value="large">Large Size</option><option value="tall">Tall Size</option></select>
-        <button class="btn" onclick="addGallery()">Upload Image</button>
+    <!-- ══════ NOTIFICATIONS ══════ -->
+    <div class="panel" id="panel-notifications">
+      <div class="panel-header">
+        <h2>Manage Notifications 📢</h2>
+        <p>Add, edit or remove notices displayed on the school website.</p>
       </div>
-      <div id="galleryGrid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header"><h3>➕ Add New Notification</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group"><label>Category</label>
+              <select id="nCat">
+                <option>Admission</option><option>Academics</option>
+                <option>Event</option><option>Exam</option>
+                <option>Holiday</option><option>Sports</option><option>General</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Date (leave blank for today)</label>
+              <input type="date" id="nDate"/>
+            </div>
+          </div>
+          <div class="form-grid one" style="margin-top:16px;">
+            <div class="form-group"><label>Title *</label><input id="nTitle" placeholder="Notification title..."/></div>
+            <div class="form-group"><label>Description (optional)</label><textarea id="nDesc" placeholder="More details about this notice..."></textarea></div>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-primary" onclick="addNotif()">📢 Publish Notification</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>📋 All Notifications <span id="notif-badge" style="font-size:12px;background:var(--bg2);padding:3px 10px;border-radius:50px;font-weight:600;color:var(--gray);margin-left:4px;"></span></h3>
+          <input type="text" placeholder="🔍 Search notifications..." id="notifSearch" oninput="filterNotifs()" style="padding:8px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;outline:none;width:220px;"/>
+        </div>
+        <div class="card-body no-pad">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Category</th><th>Title</th><th>Description</th><th>Actions</th></tr></thead>
+              <tbody id="notifTableBody"><tr><td colspan="5"><div class="loading-spinner"><span class="spin">⏳</span> Loading...</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
+    <!-- ══════ GALLERY ══════ -->
+    <div class="panel" id="panel-gallery">
+      <div class="panel-header">
+        <h2>Photo Gallery 🖼️</h2>
+        <p>Upload new photos or remove existing ones from the school gallery.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header"><h3>📤 Upload New Image</h3></div>
+        <div class="card-body">
+          <div class="upload-zone" onclick="document.getElementById('gFile').click()" id="uploadZone">
+            <span class="upload-icon">📷</span>
+            <p><strong>Click to select an image</strong> or drag &amp; drop here</p>
+            <p style="font-size:12px;margin-top:6px;">JPG, PNG, WEBP — up to 10MB</p>
+            <input type="file" id="gFile" accept="image/*" onchange="previewImage(this)"/>
+          </div>
+          <div id="imagePreview" style="display:none;margin-top:16px;">
+            <img id="previewImg" style="max-height:180px;border-radius:10px;border:2px solid var(--border);"/>
+          </div>
+          <div class="form-grid" style="margin-top:18px;">
+            <div class="form-group"><label>Image Caption / Alt Text *</label><input id="gAlt" placeholder="e.g. Annual Sports Day 2025"/></div>
+            <div class="form-group"><label>Display Size</label>
+              <select id="gCls">
+                <option value="">Standard (1x1)</option>
+                <option value="large">Large (2x2 feature)</option>
+                <option value="tall">Tall (1x2)</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="addGallery()" id="uploadBtn">📤 Upload Image</button>
+            <button class="btn btn-secondary" onclick="clearUpload()">✕ Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>🖼️ Gallery Images <span id="gallery-badge" style="font-size:12px;background:var(--bg2);padding:3px 10px;border-radius:50px;font-weight:600;color:var(--gray);margin-left:4px;"></span></h3>
+        </div>
+        <div class="card-body">
+          <div id="galleryGrid" class="gallery-admin-grid">
+            <div class="loading-spinner"><span class="spin">⏳</span> Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ ADMIN USERS ══════ -->
+    <div class="panel" id="panel-admins">
+      <div class="panel-header">
+        <h2>Admin Users 👥</h2>
+        <p>Manage who has access to this dashboard. Both your emails are already registered.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header"><h3>➕ Add New Admin</h3></div>
+        <div class="card-body">
+          <div class="alert alert-warning">⚠️ Only add trusted people. All admin users have full access to edit the website.</div>
+          <div class="form-grid">
+            <div class="form-group"><label>Email Address</label><input type="email" id="newAdminEmail" placeholder="newadmin@example.com"/></div>
+            <div class="form-group"><label>Password</label><input type="password" id="newAdminPass" placeholder="Minimum 6 characters"/></div>
+          </div>
+          <div style="margin-top:16px;">
+            <button class="btn btn-primary" onclick="addAdmin()">👤 Add Admin User</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>🔑 Current Admins</h3></div>
+        <div class="card-body no-pad">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+              <tbody id="adminTableBody"><tr><td colspan="4"><div class="loading-spinner"><span class="spin">⏳</span> Loading...</div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ CHANGE PASSWORD ══════ -->
+    <div class="panel" id="panel-password">
+      <div class="panel-header">
+        <h2>Change Password 🔐</h2>
+        <p>Update the password for your currently logged-in account.</p>
+      </div>
+      <div class="card" style="max-width:520px;">
+        <div class="card-header"><h3>🔒 Update Your Password</h3></div>
+        <div class="card-body">
+          <div class="alert alert-info">
+            💡 After changing your password, you'll need to use the new password to log in next time.
+          </div>
+          <div class="form-grid one" style="margin-top:16px;">
+            <div class="form-group"><label>Current Password</label><input type="password" id="curPass" placeholder="Your current password"/></div>
+            <div class="form-group"><label>New Password</label><input type="password" id="newPass" placeholder="At least 6 characters"/></div>
+            <div class="form-group"><label>Confirm New Password</label><input type="password" id="confPass" placeholder="Re-enter new password"/></div>
+          </div>
+          <div id="passErr" style="color:var(--red);font-size:13px;margin-top:10px;display:none;"></div>
+          <div style="margin-top:20px;">
+            <button class="btn btn-primary" onclick="changePassword()">🔐 Update Password</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════ RESET PASSWORD MODAL ═══════ -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('resetModal')">×</button>
+    <h3>🔑 Reset Password</h3>
+    <p>Set a new password for <strong id="resetEmailLabel">—</strong></p>
+    <input type="hidden" id="resetAdminId"/>
+    <div class="form-grid one">
+      <div class="form-group"><label>New Password</label><input type="password" id="resetNewPass" placeholder="Minimum 6 characters"/></div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:10px;">
+      <button class="btn btn-primary" onclick="doResetPassword()">Save New Password</button>
+      <button class="btn btn-secondary" onclick="closeModal('resetModal')">Cancel</button>
+    </div>
   </div>
 </div>
+
+<!-- ═══════ TOAST ═══════ -->
+<div id="toast"></div>
 
 <script>
+/* ══════════════════ STATE ══════════════════ */
 let token = localStorage.getItem('cmsToken');
+let allNotifs = [];
+let currentAdminEmail = '';
 
+/* ══════════════════ CLOCK ══════════════════ */
+function updateClock() {
+  const now = new Date();
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-IN', {
+    hour:'2-digit', minute:'2-digit', hour12:true
+  });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ══════════════════ AUTH ══════════════════ */
 function checkAuth() {
-  if(token) {
+  if (token) {
     document.getElementById('loginScreen').style.display = 'none';
-    loadContent();
-    loadNotifications();
-    loadGallery();
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      currentAdminEmail = payload.email || '';
+      document.getElementById('adminEmailDisplay').textContent = currentAdminEmail;
+    } catch(e) {}
+    loadAll();
   } else {
     document.getElementById('loginScreen').style.display = 'flex';
   }
 }
 
 async function login() {
-  const email = document.getElementById('lEmail').value;
+  const email = document.getElementById('lEmail').value.trim();
   const password = document.getElementById('lPass').value;
-  const r = await fetch('/api/login', {
-    method: 'POST',
-    headers:{'Content-Type': 'application/json'},
-    body: JSON.stringify({email, password})
-  });
-  if(r.ok) {
-    const data = await r.json();
-    token = data.token;
-    localStorage.setItem('cmsToken', token);
-    checkAuth();
-  } else {
-    document.getElementById('lErr').style.display = 'block';
+  document.getElementById('lErr').style.display = 'none';
+  const btn = document.getElementById('loginBtn');
+  btn.classList.add('loading');
+  try {
+    const r = await fetch('/api/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    if (r.ok) {
+      const data = await r.json();
+      token = data.token;
+      localStorage.setItem('cmsToken', token);
+      checkAuth();
+    } else {
+      document.getElementById('lErr').style.display = 'block';
+    }
+  } finally {
+    btn.classList.remove('loading');
   }
 }
 
 function logout() {
+  if (!confirm('Are you sure you want to sign out?')) return;
   localStorage.removeItem('cmsToken');
   token = null;
-  checkAuth();
+  location.reload();
 }
 
-const reqAuth = () => ({ 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' });
-
-function showTab(id) {
-  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  event.target.classList.add('active');
+/* ══════════════════ NAVIGATION ══════════════════ */
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  const navBtn = document.getElementById('nav-' + id);
+  if (navBtn) navBtn.classList.add('active');
+  closeMobSidebar();
 }
 
-// -- Content Blocks
+function openMobSidebar() {
+  document.getElementById('sidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('open');
+}
+function closeMobSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+
+/* ══════════════════ CONTENT TABS ══════════════════ */
+function switchCtab(id, el) {
+  document.querySelectorAll('.ctab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ctab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ctab-' + id).classList.add('active');
+}
+
+/* ══════════════════ TOAST ══════════════════ */
+let toastTimer;
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+  t.className = 'show toast-' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3500);
+}
+
+/* ══════════════════ MODAL ══════════════════ */
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ══════════════════ LOAD ALL DATA ══════════════════ */
+function loadAll() {
+  loadContent();
+  loadNotifications();
+  loadGallery();
+  loadAdmins();
+}
+
+/* ══════════════════ AUTH HEADER ══════════════════ */
+const auth = () => ({ 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' });
+
+/* ══════════════════ CONTENT ══════════════════ */
+let contentData = {};
 async function loadContent() {
   const r = await fetch('/api/content');
-  const items = await r.json();
-  let html = '';
-  for(const [key, val] of Object.entries(items)) {
-    html += `<div class="form-group"><label>${key.replace(/_/g, ' ').toUpperCase()}</label>`;
-    if(val.length > 50) html += `<textarea id="content_${key}" rows="3">${val}</textarea>`;
-    else html += `<input type="text" id="content_${key}" value="${val}"/>`;
-    html += `</div>`;
-  }
-  document.getElementById('contentForms').innerHTML = html;
-}
-
-async function saveContent() {
-  const payload = {};
-  document.querySelectorAll('[id^="content_"]').forEach(el => {
-    payload[el.id.replace('content_', '')] = el.value;
+  contentData = await r.json();
+  Object.keys(contentData).forEach(key => {
+    const el = document.getElementById('c_' + key);
+    if (el) el.value = contentData[key];
   });
-  const r = await fetch('/api/content', { method: 'PUT', headers: reqAuth(), body: JSON.stringify(payload) });
-  if(r.ok) alert('Saved successfully!');
+  document.getElementById('dash-content-count').textContent = Object.keys(contentData).length;
 }
 
-// -- Notifications
+const contentGroups = {
+  school: ['school_name','school_sub','school_estd','school_affiliation','school_classes'],
+  hero: ['hero_badge','hero_tagline','hero_location','hero_desc','stat_years','stat_students','stat_faculty','stat_passrate'],
+  about: ['about_story','about_desc','about_mission','about_vision','about_values','about_promise','principal_quote','principal_name'],
+  contact: ['contact_phone','contact_phone2','contact_email','contact_email2','contact_address','contact_state','contact_office_hours','contact_maps_link','contact_map_embed'],
+  ticker: ['ticker_text'],
+  timings: ['timing_morning_classes','timing_morning_time','timing_day_classes','timing_day_time','timing_office_time'],
+  admission: ['admission_year','admission_cta_text']
+};
+
+async function saveContentGroup(group) {
+  const keys = contentGroups[group] || [];
+  const payload = {};
+  keys.forEach(key => {
+    const el = document.getElementById('c_' + key);
+    if (el) payload[key] = el.value;
+  });
+  const r = await fetch('/api/content', { method:'PUT', headers: auth(), body: JSON.stringify(payload) });
+  if (r.ok) showToast('Content saved successfully!');
+  else showToast('Failed to save content', 'error');
+}
+
+/* ══════════════════ NOTIFICATIONS ══════════════════ */
 async function loadNotifications() {
   const r = await fetch('/api/notifications');
-  const items = await r.json();
-  const tb = document.querySelector('#notifTable tbody');
-  tb.innerHTML = '';
-  items.forEach(i => {
-    tb.innerHTML += `<tr><td>${i.date}</td><td>${i.category}</td><td>${i.title}</td>
-    <td><button class="btn-danger" onclick="delNotif(${i.id})">Delete</button></td></tr>`;
-  });
-}
-async function addNotif() {
-  const title = document.getElementById('nTitle').value;
-  const category = document.getElementById('nCat').value;
-  const desc = document.getElementById('nDesc').value;
-  const date = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  const r = await fetch('/api/notifications', { method: 'POST', headers: reqAuth(), body: JSON.stringify({title, category, desc, date}) });
-  if(r.ok) { document.getElementById('nTitle').value=''; document.getElementById('nDesc').value=''; loadNotifications(); }
-}
-async function delNotif(id) {
-  if(confirm('Delete this notification?')) {
-    await fetch('/api/notifications/'+id, { method: 'DELETE', headers: reqAuth() });
-    loadNotifications();
-  }
+  allNotifs = await r.json();
+  renderNotifs(allNotifs);
+  document.getElementById('dash-notif-count').textContent = allNotifs.length;
+  document.getElementById('notif-badge').textContent = allNotifs.length + ' items';
 }
 
-// -- Gallery
+function renderNotifs(list) {
+  const tb = document.getElementById('notifTableBody');
+  if (!list.length) {
+    tb.innerHTML = `<tr><td colspan="5"><div class="empty-state"><span class="empty-icon">📭</span><h4>No notifications yet</h4><p>Add your first notification above.</p></div></td></tr>`;
+    return;
+  }
+  tb.innerHTML = list.map(n => `
+    <tr>
+      <td><span style="font-size:12.5px;color:var(--gray);">${n.date}</span></td>
+      <td><span class="badge badge-gold">${n.category}</span></td>
+      <td style="font-weight:600;max-width:240px;">${n.title}</td>
+      <td style="font-size:12.5px;color:var(--gray);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${n.desc || '—'}</td>
+      <td class="td-actions">
+        <button class="btn btn-danger btn-sm" onclick="delNotif(${n.id})">🗑 Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterNotifs() {
+  const q = document.getElementById('notifSearch').value.toLowerCase();
+  renderNotifs(allNotifs.filter(n =>
+    n.title.toLowerCase().includes(q) ||
+    n.category.toLowerCase().includes(q) ||
+    (n.desc||'').toLowerCase().includes(q)
+  ));
+}
+
+async function addNotif() {
+  const title = document.getElementById('nTitle').value.trim();
+  const category = document.getElementById('nCat').value;
+  const desc = document.getElementById('nDesc').value.trim();
+  const dateVal = document.getElementById('nDate').value;
+  if (!title) { showToast('Please enter a title', 'error'); return; }
+  const date = dateVal
+    ? new Date(dateVal).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })
+    : new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  const r = await fetch('/api/notifications', {
+    method:'POST', headers: auth(),
+    body: JSON.stringify({title, category, desc, date})
+  });
+  if (r.ok) {
+    document.getElementById('nTitle').value = '';
+    document.getElementById('nDesc').value = '';
+    document.getElementById('nDate').value = '';
+    showToast('Notification published!');
+    loadNotifications();
+  } else { showToast('Failed to publish', 'error'); }
+}
+
+async function delNotif(id) {
+  if (!confirm('Delete this notification? This cannot be undone.')) return;
+  const r = await fetch('/api/notifications/' + id, { method:'DELETE', headers: auth() });
+  if (r.ok) { showToast('Notification deleted'); loadNotifications(); }
+  else showToast('Failed to delete', 'error');
+}
+
+/* ══════════════════ GALLERY ══════════════════ */
 async function loadGallery() {
   const r = await fetch('/api/gallery');
   const items = await r.json();
-  let html = '';
-  items.forEach(i => {
-    html += `<div style="border:1px solid #ccc; padding:5px; text-align:center;">
-             <img src="${i.src}" style="width:100%; height:100px; object-fit:cover;" />
-             <p style="font-size:12px; height:18px; overflow:hidden;">${i.alt}</p>
-             <button class="btn-danger" onclick="delGallery(${i.id})">Delete</button></div>`;
-  });
-  document.getElementById('galleryGrid').innerHTML = html;
+  const grid = document.getElementById('galleryGrid');
+  document.getElementById('dash-gallery-count').textContent = items.length;
+  document.getElementById('gallery-badge').textContent = items.length + ' photos';
+  if (!items.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><span class="empty-icon">🖼️</span><h4>No images yet</h4><p>Upload your first photo above.</p></div>`;
+    return;
+  }
+  grid.innerHTML = items.map(i => `
+    <div class="gallery-item">
+      ${i.cls ? `<span class="gallery-cls-badge badge badge-blue">${i.cls}</span>` : ''}
+      <img src="${i.src}" alt="${i.alt}" loading="lazy"/>
+      <div class="gallery-item-info">
+        <p title="${i.alt}">${i.alt || '(no caption)'}</p>
+        <div class="gallery-item-actions">
+          <button class="btn btn-danger btn-sm" onclick="delGallery(${i.id})">🗑 Delete</button>
+        </div>
+      </div>
+    </div>`).join('');
 }
-async function addGallery() {
-  const file = document.getElementById('gFile').files[0];
-  if(!file) return alert('Select a file');
-  const fd = new FormData();
-  fd.append('image', file);
-  fd.append('alt', document.getElementById('gAlt').value);
-  fd.append('cls', document.getElementById('gCls').value);
-  const r = await fetch('/api/gallery', { method: 'POST', headers: {'Authorization': 'Bearer ' + token}, body: fd });
-  if(r.ok) { loadGallery(); document.getElementById('gFile').value = ''; }
-}
-async function delGallery(id) {
-  if(confirm('Delete image?')) {
-    await fetch('/api/gallery/'+id, { method: 'DELETE', headers: reqAuth() });
-    loadGallery();
+
+function previewImage(input) {
+  const file = input.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('imagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
   }
 }
 
+function clearUpload() {
+  document.getElementById('gFile').value = '';
+  document.getElementById('gAlt').value = '';
+  document.getElementById('imagePreview').style.display = 'none';
+}
+
+async function addGallery() {
+  const file = document.getElementById('gFile').files[0];
+  if (!file) { showToast('Please select an image first', 'error'); return; }
+  const alt = document.getElementById('gAlt').value.trim();
+  if (!alt) { showToast('Please add a caption for the image', 'error'); return; }
+  const cls = document.getElementById('gCls').value;
+  const btn = document.getElementById('uploadBtn');
+  btn.textContent = '⏳ Uploading...'; btn.disabled = true;
+  const fd = new FormData();
+  fd.append('image', file);
+  fd.append('alt', alt);
+  fd.append('cls', cls);
+  try {
+    const r = await fetch('/api/gallery', {
+      method:'POST', headers:{'Authorization': 'Bearer ' + token}, body: fd
+    });
+    if (r.ok) { showToast('Image uploaded successfully!'); clearUpload(); loadGallery(); }
+    else { const d = await r.json(); showToast(d.error || 'Upload failed', 'error'); }
+  } finally {
+    btn.textContent = '📤 Upload Image'; btn.disabled = false;
+  }
+}
+
+async function delGallery(id) {
+  if (!confirm('Delete this image from the gallery? This cannot be undone.')) return;
+  const r = await fetch('/api/gallery/' + id, { method:'DELETE', headers: auth() });
+  if (r.ok) { showToast('Image deleted'); loadGallery(); }
+  else showToast('Failed to delete', 'error');
+}
+
+/* ══════════════════ DRAG & DROP ══════════════════ */
+const uploadZone = document.getElementById('uploadZone');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('dragover');
+  const files = e.dataTransfer.files;
+  if (files.length) {
+    document.getElementById('gFile').files = files;
+    previewImage(document.getElementById('gFile'));
+  }
+});
+
+/* ══════════════════ ADMIN USERS ══════════════════ */
+async function loadAdmins() {
+  const r = await fetch('/api/admins', { headers: auth() });
+  if (!r.ok) return;
+  const admins = await r.json();
+  document.getElementById('dash-admin-count').textContent = admins.length;
+  const tb = document.getElementById('adminTableBody');
+  tb.innerHTML = admins.map((a, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>
+        <strong>${a.email}</strong>
+        ${a.email === currentAdminEmail ? '<span class="badge badge-green" style="margin-left:8px;">You</span>' : ''}
+      </td>
+      <td><span class="badge badge-gold">Admin</span></td>
+      <td class="td-actions">
+        <button class="btn btn-success btn-sm" onclick="openResetModal(${a.id}, '${a.email}')">🔑 Reset Password</button>
+        ${a.email !== currentAdminEmail ? `<button class="btn btn-danger btn-sm" onclick="deleteAdmin(${a.id}, '${a.email}')">🗑 Remove</button>` : ''}
+      </td>
+    </tr>`).join('');
+}
+
+async function addAdmin() {
+  const email = document.getElementById('newAdminEmail').value.trim();
+  const password = document.getElementById('newAdminPass').value;
+  if (!email || !password) { showToast('Both email and password are required', 'error'); return; }
+  const r = await fetch('/api/admins', {
+    method:'POST', headers: auth(), body: JSON.stringify({email, password})
+  });
+  const d = await r.json();
+  if (r.ok) {
+    showToast('Admin user added: ' + d.email);
+    document.getElementById('newAdminEmail').value = '';
+    document.getElementById('newAdminPass').value = '';
+    loadAdmins();
+  } else { showToast(d.error || 'Failed to add admin', 'error'); }
+}
+
+async function deleteAdmin(id, email) {
+  if (!confirm(`Remove admin access for ${email}?`)) return;
+  const r = await fetch('/api/admins/' + id, { method:'DELETE', headers: auth() });
+  const d = await r.json();
+  if (r.ok) { showToast('Admin removed'); loadAdmins(); }
+  else showToast(d.error || 'Failed to remove', 'error');
+}
+
+function openResetModal(id, email) {
+  document.getElementById('resetAdminId').value = id;
+  document.getElementById('resetEmailLabel').textContent = email;
+  document.getElementById('resetNewPass').value = '';
+  document.getElementById('resetModal').classList.add('open');
+}
+
+async function doResetPassword() {
+  const id = document.getElementById('resetAdminId').value;
+  const newPassword = document.getElementById('resetNewPass').value;
+  if (!newPassword || newPassword.length < 6) { showToast('Password must be at least 6 characters', 'error'); return; }
+  const r = await fetch('/api/admins/' + id + '/reset-password', {
+    method:'PUT', headers: auth(), body: JSON.stringify({newPassword})
+  });
+  if (r.ok) { showToast('Password reset successfully!'); closeModal('resetModal'); }
+  else showToast('Failed to reset password', 'error');
+}
+
+/* ══════════════════ CHANGE MY PASSWORD ══════════════════ */
+async function changePassword() {
+  const currentPassword = document.getElementById('curPass').value;
+  const newPassword = document.getElementById('newPass').value;
+  const confPassword = document.getElementById('confPass').value;
+  const errEl = document.getElementById('passErr');
+  errEl.style.display = 'none';
+  if (!currentPassword || !newPassword || !confPassword) {
+    errEl.textContent = '⚠️ All fields are required'; errEl.style.display = 'block'; return;
+  }
+  if (newPassword !== confPassword) {
+    errEl.textContent = '⚠️ New passwords do not match'; errEl.style.display = 'block'; return;
+  }
+  if (newPassword.length < 6) {
+    errEl.textContent = '⚠️ Password must be at least 6 characters'; errEl.style.display = 'block'; return;
+  }
+  const r = await fetch('/api/change-password', {
+    method:'POST', headers: auth(), body: JSON.stringify({currentPassword, newPassword})
+  });
+  const d = await r.json();
+  if (r.ok) {
+    showToast('Password changed! Please log in again.');
+    ['curPass','newPass','confPass'].forEach(id => document.getElementById(id).value = '');
+    setTimeout(() => { localStorage.removeItem('cmsToken'); location.reload(); }, 2000);
+  } else {
+    errEl.textContent = '⚠️ ' + (d.error || 'Failed to change password');
+    errEl.style.display = 'block';
+  }
+}
+
+/* ══════════════════ INIT ══════════════════ */
 checkAuth();
 </script>
 </body>
